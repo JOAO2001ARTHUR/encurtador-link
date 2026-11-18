@@ -1,0 +1,19 @@
+[
+  {
+    "code": "google",
+    "targetUrl": "https://google.com",
+    "title": "Link de Exemplo (Google)",
+    "clicks": 0,
+    "createdAt": "2026-11-18T15:06:41.097Z",
+    "isActive": true
+  },
+  {
+    "code": "git",
+    "targetUrl": "https://github.com",
+    "title": "GitHub Oficial",
+    "clicks": 1,
+    "createdAt": "2026-11-18T15:06:59.432Z",
+    "isActive": true,
+    "lastClickedAt": "2026-11-18T15:07:15.919Z"
+  }
+]
