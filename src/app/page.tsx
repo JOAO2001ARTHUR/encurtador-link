@@ -56,13 +56,18 @@ export default function DashboardPage() {
     link: ShortLink | null;
     targetUrl: string;
     title: string;
+    error: string | null;
   }>({
     open: false,
     link: null,
     targetUrl: '',
     title: '',
+    error: null,
   });
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // Delete Confirmation state (replaces window.confirm)
+  const [deleteConfirmCode, setDeleteConfirmCode] = useState<string | null>(null);
 
   // Deploy guide modal state
   const [showDeployGuide, setShowDeployGuide] = useState(false);
@@ -160,10 +165,10 @@ export default function DashboardPage() {
     }
   }
 
-  async function handleDelete(code: string) {
-    if (!window.confirm(`Tem certeza que deseja excluir o link "/${code}"?`)) {
-      return;
-    }
+  async function confirmDelete() {
+    if (!deleteConfirmCode) return;
+    const code = deleteConfirmCode;
+    setDeleteConfirmCode(null);
 
     try {
       setLinks((prev) => prev.filter((l) => l.code !== code));
@@ -199,6 +204,7 @@ export default function DashboardPage() {
       link,
       targetUrl: link.targetUrl,
       title: link.title || '',
+      error: null,
     });
   }
 
@@ -207,6 +213,8 @@ export default function DashboardPage() {
     if (!editModal.link) return;
 
     setIsUpdating(true);
+    setEditModal((prev) => ({ ...prev, error: null }));
+
     try {
       const res = await fetch(`/api/links/${editModal.link.code}`, {
         method: 'PATCH',
@@ -219,13 +227,13 @@ export default function DashboardPage() {
 
       const data = await res.json();
       if (data.success) {
-        setEditModal({ open: false, link: null, targetUrl: '', title: '' });
+        setEditModal({ open: false, link: null, targetUrl: '', title: '', error: null });
         fetchLinks();
       } else {
-        alert(data.error || 'Erro ao atualizar link');
+        setEditModal((prev) => ({ ...prev, error: data.error || 'Erro ao atualizar link' }));
       }
     } catch {
-      alert('Falha na requisição de atualização');
+      setEditModal((prev) => ({ ...prev, error: 'Falha na requisição de atualização' }));
     } finally {
       setIsUpdating(false);
     }
@@ -618,7 +626,7 @@ export default function DashboardPage() {
 
                         {/* Delete button */}
                         <button
-                          onClick={() => handleDelete(link.code)}
+                          onClick={() => setDeleteConfirmCode(link.code)}
                           className="p-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 hover:text-rose-300 transition border border-rose-500/30 cursor-pointer"
                           title="Excluir link"
                         >
@@ -633,6 +641,37 @@ export default function DashboardPage() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal (no browser alert/confirm) */}
+      {deleteConfirmCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-sm w-full space-y-4 relative shadow-2xl">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <Trash2 className="w-5 h-5 text-rose-400" />
+              Excluir Link
+            </h3>
+            <p className="text-sm text-slate-300">
+              Tem certeza que deseja excluir o link encurtado <strong>/{deleteConfirmCode}</strong>? Essa ação não pode ser desfeita.
+            </p>
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setDeleteConfirmCode(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm transition cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                onClick={confirmDelete}
+                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-medium text-sm transition cursor-pointer"
+              >
+                Sim, Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* QR Code Modal */}
       {qrModal.open && qrModal.link && (
@@ -694,7 +733,7 @@ export default function DashboardPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 md:p-8 max-w-md w-full space-y-6 relative shadow-2xl">
             <button
-              onClick={() => setEditModal({ open: false, link: null, targetUrl: '', title: '' })}
+              onClick={() => setEditModal({ open: false, link: null, targetUrl: '', title: '', error: null })}
               className="absolute top-4 right-4 p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
             >
               <X className="w-5 h-5" />
@@ -740,10 +779,17 @@ export default function DashboardPage() {
                 />
               </div>
 
+              {editModal.error && (
+                <div className="text-xs text-rose-400 bg-rose-950/50 border border-rose-800/60 rounded-lg p-2.5 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 shrink-0" />
+                  <span>{editModal.error}</span>
+                </div>
+              )}
+
               <div className="flex items-center justify-end gap-3 pt-3">
                 <button
                   type="button"
-                  onClick={() => setEditModal({ open: false, link: null, targetUrl: '', title: '' })}
+                  onClick={() => setEditModal({ open: false, link: null, targetUrl: '', title: '', error: null })}
                   className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm transition cursor-pointer"
                 >
                   Cancelar
