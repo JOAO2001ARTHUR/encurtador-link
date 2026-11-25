@@ -11,9 +11,27 @@
     "code": "git",
     "targetUrl": "https://github.com",
     "title": "GitHub Oficial",
-    "clicks": 1,
+    "clicks": 3,
     "createdAt": "2026-11-18T15:06:59.432Z",
     "isActive": true,
-    "lastClickedAt": "2026-11-18T15:07:15.919Z"
+    "lastClickedAt": "2026-11-18T16:43:05.534Z"
+  },
+  {
+    "code": "noticias",
+    "targetUrl": "https://news.ycombinator.com",
+    "title": "Hacker News",
+    "clicks": 1,
+    "createdAt": "2026-11-18T16:50:08.735Z",
+    "isActive": true,
+    "lastClickedAt": "2026-11-18T16:50:21.952Z"
+  },
+  {
+    "code": "wiki",
+    "targetUrl": "https://wikipedia.org",
+    "title": "Wikip�dia",
+    "clicks": 1,
+    "createdAt": "2026-11-18T16:52:48.347Z",
+    "isActive": true,
+    "lastClickedAt": "2026-11-18T16:52:48.451Z"
   }
 ]
